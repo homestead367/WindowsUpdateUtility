@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}New Patch Job{% endblock %}
+{% block content %}
+<h2 class="mb-4">New Patch Job</h2>
+
+<div class="row">
+  <div class="col-lg-7">
+    <div class="card shadow-sm mb-4">
+      <div class="card-header"><strong>1. Upload Server List</strong></div>
+      <div class="card-body">
+        <form method="post" action="/jobs/new/preview" enctype="multipart/form-data">
+          <div class="mb-3">
+            <label class="form-label">Server file (.csv or .xlsx)</label>
+            <input type="file" class="form-control" name="file" accept=".csv,.xlsx,.xls" required>
+            <div class="form-text">
+              <a href="/static/sample_servers.csv" download>Download sample template</a>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Default Username</label>
+            <input type="text" class="form-control" name="default_username"
+                   placeholder="DOMAIN\svcpatch" value="{{ default_username or '' }}">
+          </div>
+          <button type="submit" class="btn btn-primary">Preview Servers</button>
+        </form>
+      </div>
+    </div>
+
+    {% if servers %}
+    <div class="card shadow-sm border-success">
+      <div class="card-header bg-success text-white">
+        <strong>2. Confirm — {{ servers|length }} server(s) found</strong>
+      </div>
+      <div class="card-body p-0">
+        {% if errors %}
+        <div class="alert alert-danger m-3">
+          <strong>Restart window errors (fix before starting):</strong>
+          <ul class="mb-0">{% for e in errors %}<li>{{ e }}</li>{% endfor %}</ul>
+        </div>
+        {% endif %}
+        <div class="table-responsive">
+          <table class="table table-sm mb-0">
+            <thead class="table-light">
+              <tr><th>Server</th><th>IP</th><th>Restart Window</th><th>Custom User</th></tr>
+            </thead>
+            <tbody>
+              {% for s in servers %}
+              <tr>
+                <td>{{ s.server_name }}</td>
+                <td><code>{{ s.ip_address }}</code></td>
+                <td>{{ s.restart_window }}</td>
+                <td>{{ s.username or '<em class="text-muted">default</em>'|safe }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+      {% if not errors %}
+      <div class="card-footer">
+        <form method="post" action="/jobs/new/start">
+          <input type="hidden" name="filepath" value="{{ filepath }}">
+          <input type="hidden" name="filename" value="{{ filename }}">
+          <input type="hidden" name="default_username" value="{{ default_username or '' }}">
+          <div class="mb-3">
+            <label class="form-label">Default Password</label>
+            <input type="password" class="form-control" name="default_password"
+                   placeholder="Enter WinRM password" required>
+          </div>
+          <button type="submit" class="btn btn-success btn-lg">
+            <i class="bi bi-play-fill me-1"></i>Start Patching
+          </button>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+  <div class="col-lg-5">
+    <div class="card shadow-sm">
+      <div class="card-header">Required Spreadsheet Columns</div>
+      <div class="card-body">
+        <table class="table table-sm">
+          <thead><tr><th>Column</th><th>Required</th><th>Example</th></tr></thead>
+          <tbody>
+            <tr><td><code>server_name</code></td><td>Yes</td><td>PROD-WEB-01</td></tr>
+            <tr><td><code>ip_address</code></td><td>Yes</td><td>192.168.1.10</td></tr>
+            <tr><td><code>restart_window</code></td><td>Yes</td><td>Sunday 02:00</td></tr>
+            <tr><td><code>username</code></td><td>No</td><td>DOMAIN\svc</td></tr>
+            <tr><td><code>password</code></td><td>No</td><td>(per-server)</td></tr>
+          </tbody>
+        </table>
+        <p class="text-muted small mb-0">
+          Restart window formats: <code>Sunday 02:00</code>, <code>Sat 03:30</code>,
+          or <code>2026-06-15 02:00</code>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
