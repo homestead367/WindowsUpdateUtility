@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Job #{{ job_id }}{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-start mb-4">
+  <div>
+    <h2 class="mb-1">Job #{{ job_id }} — {{ filename }}</h2>
+    <small class="text-muted">Started {{ created_at.strftime('%Y-%m-%d %H:%M') }}</small>
+  </div>
+  <a href="/" class="btn btn-outline-secondary">← All Jobs</a>
+</div>
+
+<div class="mb-4">
+  <div class="d-flex justify-content-between mb-1">
+    <span id="progress-label">{{ progress.done }} / {{ progress.total }} servers complete</span>
+    <span id="progress-pct">{{ progress.pct }}%</span>
+  </div>
+  <div class="progress" style="height:12px">
+    <div id="progress-bar" class="progress-bar progress-bar-striped progress-bar-animated"
+         style="width:{{ progress.pct }}%"></div>
+  </div>
+</div>
+
+<div class="card shadow-sm">
+  <div class="table-responsive">
+    <table class="table table-hover mb-0" id="server-table">
+      <thead class="table-dark">
+        <tr>
+          <th>Server</th><th>IP</th><th>Status</th>
+          <th>Updates</th><th>Restart Scheduled</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="server-tbody">
+        {% for s in servers %}
+        <tr id="row-{{ s.id }}">
+          <td>{{ s.server_name }}</td>
+          <td><code>{{ s.ip_address }}</code></td>
+          <td>
+            <span class="badge text-white status-badge bg-secondary">
+              {{ s.status | replace('_', ' ') }}
+            </span>
+            {% if s.error_message %}
+            <i class="bi bi-exclamation-circle text-danger ms-1"
+               title="{{ s.error_message | e }}" data-bs-toggle="tooltip"></i>
+            {% endif %}
+          </td>
+          <td>{{ s.updates_installed if s.updates_installed else '—' }}</td>
+          <td>{{ s.restart_scheduled_at or '—' }}</td>
+          <td>
+            <button class="btn btn-sm btn-outline-info me-1"
+                    onclick="testConnection({{ s.id }}, this)">Test</button>
+            <button class="btn btn-sm btn-outline-warning me-1"
+                    onclick="reschedule({{ s.id }})">Reschedule</button>
+            <button class="btn btn-sm btn-outline-danger"
+                    onclick="manualRestart({{ s.id }})">Restart Now</button>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+  const JOB_ID = {{ job_id }};
+</script>
+<script src="/static/app.js"></script>
+{% endblock %}
