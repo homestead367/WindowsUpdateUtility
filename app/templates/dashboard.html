@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="mb-0">Patch Jobs</h2>
+  <a href="/jobs/new" class="btn btn-success"><i class="bi bi-plus-lg me-1"></i>New Job</a>
+</div>
+{% if jobs %}
+<div class="card shadow-sm">
+  <table class="table table-hover mb-0">
+    <thead class="table-dark">
+      <tr>
+        <th>#</th><th>File</th><th>Started</th><th>Servers</th><th>Progress</th><th>Status</th><th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for job in jobs %}
+      <tr>
+        <td class="text-muted">{{ job.id }}</td>
+        <td><i class="bi bi-file-earmark-spreadsheet me-1 text-success"></i>{{ job.filename }}</td>
+        <td>{{ job.created_at }}</td>
+        <td>{{ job.done }} / {{ job.total }}</td>
+        <td style="min-width:120px">
+          <div class="progress" style="height:8px">
+            <div class="progress-bar" style="width:{{ job.pct }}%"></div>
+          </div>
+        </td>
+        <td><span class="badge badge-{{ job.status }} text-white">{{ job.status }}</span></td>
+        <td><a href="/jobs/{{ job.id }}" class="btn btn-sm btn-outline-primary">View</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="text-center py-5 text-muted">
+  <i class="bi bi-inbox fs-1"></i>
+  <p class="mt-3">No patch jobs yet. <a href="/jobs/new">Create one</a>.</p>
+</div>
+{% endif %}
+{% endblock %}
