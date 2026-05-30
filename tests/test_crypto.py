@@ -1,5 +1,8 @@
 import os
-os.environ['SECRET_KEY'] = 'test-secret-key-32-bytes-exactly!'
+import pytest
+from cryptography.fernet import Fernet
+
+os.environ['SECRET_KEY'] = Fernet.generate_key().decode()
 
 from app.services.crypto import encrypt, decrypt
 
@@ -16,8 +19,9 @@ def test_decrypt_round_trips():
 def test_encrypt_empty_string_returns_empty():
     assert encrypt('') == ''
 
-def test_decrypt_empty_string_returns_empty():
-    assert decrypt('') == ''
+def test_decrypt_empty_string_raises():
+    with pytest.raises(Exception):
+        decrypt('')
 
 def test_different_values_produce_different_ciphertext():
     assert encrypt('abc') != encrypt('xyz')

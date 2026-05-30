@@ -2,6 +2,7 @@ import os
 import stat
 from pathlib import Path
 from dotenv import load_dotenv
+from cryptography.fernet import Fernet
 
 load_dotenv()
 
@@ -9,9 +10,9 @@ def _bootstrap_secret_key():
     key = os.environ.get('SECRET_KEY')
     if key:
         return key
-    key = os.urandom(32).hex()
+    # Generate a proper Fernet key (32 random bytes, url-safe base64 encoded)
+    key = Fernet.generate_key().decode()
     env_path = Path('.env')
-    # Write with mode 0600 so only the owner can read it
     flags = os.O_WRONLY | os.O_CREAT | os.O_APPEND
     fd = os.open(str(env_path), flags, 0o600)
     try:
@@ -31,5 +32,5 @@ class Config:
 class TestConfig(Config):
     TESTING = True
     DATABASE_URL = 'sqlite:///:memory:'
-    SECRET_KEY = 'test-secret-key-32-bytes-exactly!'
+    SECRET_KEY = Fernet.generate_key().decode()  # fresh valid key per test run
     WTF_CSRF_ENABLED = False

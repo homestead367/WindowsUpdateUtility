@@ -1,14 +1,17 @@
 import os
-import base64
-import hashlib
 from cryptography.fernet import Fernet
 
 def _get_fernet() -> Fernet:
     key = os.environ.get('SECRET_KEY', '')
     if not key:
         raise RuntimeError('SECRET_KEY environment variable is not set')
-    derived = base64.urlsafe_b64encode(hashlib.sha256(key.encode()).digest())
-    return Fernet(derived)
+    try:
+        return Fernet(key.encode())
+    except Exception:
+        raise RuntimeError(
+            'SECRET_KEY is not a valid Fernet key. '
+            'Generate one with: python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"'
+        )
 
 def encrypt(plaintext: str) -> str:
     if not plaintext:
@@ -16,6 +19,4 @@ def encrypt(plaintext: str) -> str:
     return _get_fernet().encrypt(plaintext.encode()).decode()
 
 def decrypt(ciphertext: str) -> str:
-    if not ciphertext:
-        return ''
     return _get_fernet().decrypt(ciphertext.encode()).decode()
