@@ -3,6 +3,14 @@ import pandas as pd
 from .restart_window import parse_restart_window
 
 REQUIRED_COLUMNS = {'server_name', 'ip_address', 'restart_window'}
+_NAN_VALUES = {'nan', 'none', 'null', 'n/a', ''}
+
+def _clean_optional(value) -> str | None:
+    """Convert pandas cell value to str or None, treating NaN and empty as None."""
+    if value is None:
+        return None
+    s = str(value).strip()
+    return None if s.lower() in _NAN_VALUES else s
 
 def parse_server_file(filepath: str) -> list[dict]:
     """Parse xlsx or csv file. Returns list of server dicts. Raises ValueError on bad format."""
@@ -24,14 +32,12 @@ def parse_server_file(filepath: str) -> list[dict]:
 
     servers = []
     for _, row in df.iterrows():
-        username = str(row.get('username', '') or '').strip() or None
-        password = str(row.get('password', '') or '').strip() or None
         servers.append({
             'server_name': str(row['server_name']).strip(),
             'ip_address': str(row['ip_address']).strip(),
             'restart_window': str(row['restart_window']).strip(),
-            'username': username,
-            'password': password,
+            'username': _clean_optional(row.get('username')),
+            'password': _clean_optional(row.get('password')),
         })
 
     return servers

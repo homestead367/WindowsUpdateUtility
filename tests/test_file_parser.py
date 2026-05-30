@@ -70,3 +70,23 @@ def test_validate_restart_windows_invalid():
     errors = validate_restart_windows(servers)
     assert len(errors) == 1
     assert 'A' in errors[0]
+
+def test_parse_csv_empty_optional_columns_return_none(tmp_path):
+    csv = tmp_path / 'servers.csv'
+    csv.write_text(
+        'server_name,ip_address,restart_window,username,password\n'
+        'WEB-01,192.168.1.10,Sunday 02:00,,\n'
+    )
+    result = parse_server_file(str(csv))
+    assert result[0]['username'] is None
+    assert result[0]['password'] is None
+
+def test_parse_csv_whitespace_optional_columns_return_none(tmp_path):
+    csv = tmp_path / 'servers.csv'
+    csv.write_text(
+        'server_name,ip_address,restart_window,username,password\n'
+        'WEB-01,192.168.1.10,Sunday 02:00,   ,   \n'
+    )
+    result = parse_server_file(str(csv))
+    assert result[0]['username'] is None
+    assert result[0]['password'] is None
