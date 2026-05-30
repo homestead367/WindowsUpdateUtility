@@ -9,7 +9,7 @@ def create_app(config=None):
     if config:
         app.config.update(config)
 
-    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+    os.makedirs(app.config['UPLOAD_FOLDER'], mode=0o700, exist_ok=True)
     init_db(app)
 
     from .routes.dashboard import bp as dashboard_bp
