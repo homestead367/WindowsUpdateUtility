@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Settings{% endblock %}
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <h2 class="mb-4">Settings</h2>
+    <div class="card shadow-sm">
+      <div class="card-header"><strong>Default WinRM Credentials</strong></div>
+      <div class="card-body">
+        <form method="post" action="/settings">
+          <div class="mb-3">
+            <label class="form-label">Default Username</label>
+            <input type="text" class="form-control" name="username"
+                   value="{{ username }}" placeholder="DOMAIN\svcpatch">
+            <div class="form-text">Used when no per-server username is in the spreadsheet.</div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Default Password</label>
+            <input type="password" class="form-control" name="password"
+                   placeholder="Leave blank to keep existing password">
+            <div class="form-text">Stored encrypted. Leave blank to keep the current password.</div>
+          </div>
+          <hr>
+          <h6 class="mb-3">WinRM Configuration</h6>
+          <div class="row">
+            <div class="col-md-6 mb-3">
+              <label class="form-label">WinRM Port</label>
+              <input type="number" class="form-control" name="winrm_port"
+                     value="{{ winrm_port }}" min="1" max="65535">
+              <div class="form-text">Default: 5985 (HTTP). Use 5986 for HTTPS.</div>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="form-label">Max Concurrent Connections</label>
+              <input type="number" class="form-control" name="max_workers"
+                     value="{{ max_workers }}" min="1" max="50">
+              <div class="form-text">Servers patched in parallel.</div>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">Save Settings</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
