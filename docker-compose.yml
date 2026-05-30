@@ -1,0 +1,16 @@
+services:
+  winpatch:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - winpatch_data:/data
+    environment:
+      - DATABASE_URL=sqlite:////data/winpatch.db
+      - UPLOAD_FOLDER=/data/uploads
+    restart: unless-stopped
+    security_opt:
+      - apparmor=unconfined
+
+volumes:
+  winpatch_data:
