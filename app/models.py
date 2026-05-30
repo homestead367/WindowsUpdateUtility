@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from sqlalchemy import Integer, String, Text, DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .database import Base
@@ -9,7 +9,7 @@ class Job(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     filename: Mapped[str] = mapped_column(String(255), nullable=False)
-    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     status: Mapped[str] = mapped_column(String(50), default='pending')
 
     servers: Mapped[list['Server']] = relationship(
@@ -40,7 +40,7 @@ class Server(Base):
     restart_scheduled_at: Mapped[datetime | None] = mapped_column(DateTime)
     error_message: Mapped[str | None] = mapped_column(Text)
     log_output: Mapped[str | None] = mapped_column(Text)
-    updated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc))
 
     job: Mapped['Job'] = relationship('Job', back_populates='servers')
 
@@ -50,10 +50,12 @@ class Server(Base):
             'server_name': self.server_name,
             'ip_address': self.ip_address,
             'restart_window': self.restart_window,
+            'username': self.username,
             'status': self.status,
             'updates_installed': self.updates_installed,
             'restart_scheduled_at': self.restart_scheduled_at.isoformat() if self.restart_scheduled_at else None,
             'error_message': self.error_message,
+            'log_output': self.log_output,
         }
 
 
