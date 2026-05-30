@@ -28,6 +28,9 @@ class Config:
     WINRM_PORT = int(os.environ.get('WINRM_PORT', 5985))
     MAX_WORKERS = int(os.environ.get('MAX_WORKERS', 10))
     UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER', '/var/lib/winpatch/uploads')
+    WTF_CSRF_ENABLED = True
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_SECURE = False  # set True when behind HTTPS reverse proxy
 
 class TestConfig(Config):
     TESTING = True

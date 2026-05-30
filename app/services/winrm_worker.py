@@ -1,6 +1,7 @@
 import winrm
 from datetime import datetime
 from .restart_window import parse_restart_window
+from .ip_validator import is_allowed_ip
 
 PS_ENSURE_MODULE = r"""
 $module = Get-Module -ListAvailable -Name PSWindowsUpdate
@@ -84,6 +85,11 @@ def run_server_worker(server_id: int, default_username: str, default_password: s
     finally:
         s.close()
 
+    if not is_allowed_ip(ip):
+        _update_server(server_id, status='error',
+                       error_message=f'Blocked: {ip} is not a private network address')
+        return
+
     _update_server(server_id, status='connecting')
 
     try:
@@ -158,6 +164,8 @@ def run_server_worker(server_id: int, default_username: str, default_password: s
 
 def test_connection(ip: str, port: int, username: str, password: str) -> tuple[bool, str]:
     """Test WinRM connectivity. Returns (success, message)."""
+    if not is_allowed_ip(ip):
+        return False, f'Blocked: {ip} is not a private network address'
     try:
         session = winrm.Session(
             f'http://{ip}:{port}/wsman',
@@ -175,6 +183,8 @@ def test_connection(ip: str, port: int, username: str, password: str) -> tuple[b
 
 def immediate_restart(ip: str, port: int, username: str, password: str) -> tuple[bool, str]:
     """Delete scheduled task and issue immediate restart."""
+    if not is_allowed_ip(ip):
+        return False, f'Blocked: {ip} is not a private network address'
     try:
         session = winrm.Session(
             f'http://{ip}:{port}/wsman',
@@ -192,6 +202,8 @@ def immediate_restart(ip: str, port: int, username: str, password: str) -> tuple
 def reschedule_restart(ip: str, port: int, username: str, password: str,
                        new_window: str) -> tuple[bool, str]:
     """Delete old task and register new restart task. Returns (success, iso_datetime_or_error)."""
+    if not is_allowed_ip(ip):
+        return False, f'Blocked: {ip} is not a private network address'
     try:
         restart_dt = parse_restart_window(new_window)
     except ValueError as e:
