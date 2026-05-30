@@ -1,0 +1,4 @@
+server_name,ip_address,restart_window,username,password
+PROD-WEB-01,192.168.1.10,Sunday 02:00,DOMAIN\svcpatch,
+PROD-DB-01,192.168.1.11,Sunday 02:00,,
+DEV-APP-01,192.168.1.20,Saturday 03:00,DOMAIN\devsvc,DevPass123
