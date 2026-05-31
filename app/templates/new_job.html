@@ -61,7 +61,6 @@
       <div class="card-footer">
         <form method="post" action="/jobs/new/start">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-          <input type="hidden" name="filepath" value="{{ filepath }}">
           <input type="hidden" name="filename" value="{{ filename }}">
           <input type="hidden" name="default_username" value="{{ default_username or '' }}">
           <div class="mb-3">

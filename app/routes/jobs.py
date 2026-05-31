@@ -61,13 +61,24 @@ def preview_file():
 
 @bp.post('/jobs/new/start')
 def start_job():
-    filepath = request.form.get('filepath')
-    filename = request.form.get('filename')
+    filename = request.form.get('filename', '').strip()
     default_username = request.form.get('default_username', '').strip()
     default_password = request.form.get('default_password', '').strip()
 
-    if not filepath or not os.path.exists(filepath):
-        flash('Upload the file again to start a job.', 'danger')
+    if not filename:
+        flash('No filename provided. Please upload the file again.', 'danger')
+        return redirect(url_for('jobs.new_job_form'))
+
+    upload_dir = os.path.realpath(os.environ.get('UPLOAD_FOLDER', '/var/lib/winpatch/uploads'))
+    filepath = os.path.realpath(os.path.join(upload_dir, secure_filename(filename)))
+
+    # Confirm the resolved path is within the upload directory (prevent path traversal)
+    if not filepath.startswith(upload_dir + os.sep) and filepath != upload_dir:
+        flash('Invalid file path.', 'danger')
+        return redirect(url_for('jobs.new_job_form'))
+
+    if not os.path.exists(filepath):
+        flash('Uploaded file not found. Please upload the file again.', 'danger')
         return redirect(url_for('jobs.new_job_form'))
 
     try:
