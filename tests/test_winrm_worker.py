@@ -40,11 +40,11 @@ def test_server(app):
     s2.close()
 
 
-def _ps(stdout=b'', status_code=0):
+def _ps(stdout=b'', status_code=0, std_err=b''):
     r = MagicMock()
     r.status_code = status_code
     r.std_out = stdout
-    r.std_err = b''
+    r.std_err = std_err
     return r
 
 
@@ -114,10 +114,10 @@ def test_test_worker_connection_failure(app, test_server):
 
 def test_test_worker_module_failure(app, test_server):
     mock_session = MagicMock()
-    fail = MagicMock()
-    fail.status_code = 1
-    fail.std_err = b'module error'
-    mock_session.run_ps.side_effect = [_ps(b'ping'), fail]
+    mock_session.run_ps.side_effect = [
+        _ps(b'ping'),
+        _ps(b'', status_code=1, std_err=b'module error'),
+    ]
     with patch('app.services.winrm_worker.winrm.Session', return_value=mock_session):
         from app.services.winrm_worker import run_server_test_worker
         run_server_test_worker(test_server, 'admin', 'pass', None, 5985)
