@@ -7,6 +7,7 @@ const STATUS_COLORS = {
   scheduling_restart: 'primary',
   up_to_date: 'success',
   restart_scheduled: 'success',
+  test_complete: 'success',
   restarting: 'warning',
   error: 'danger',
 };
@@ -20,6 +21,7 @@ const STATUS_LABELS = {
   scheduling_restart: 'Scheduling restart...',
   up_to_date: 'Up to date',
   restart_scheduled: 'Restart scheduled',
+  test_complete: 'Ready',
   restarting: 'Restarting...',
   error: 'Error',
 };

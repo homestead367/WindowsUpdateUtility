@@ -33,7 +33,7 @@
       <thead class="table-dark">
         <tr>
           <th>Server</th><th>IP</th><th>Status</th>
-          <th>Updates</th><th>Restart Scheduled</th><th>Actions</th>
+          <th>{% if job_type == 'test' %}Updates Available{% else %}Updates Installed{% endif %}</th><th>Restart Scheduled</th><th>Actions</th>
         </tr>
       </thead>
       <tbody id="server-tbody">
@@ -55,10 +55,12 @@
           <td>
             <button class="btn btn-sm btn-outline-info me-1"
                     onclick="testConnection({{ s.id }}, this)">Test</button>
+            {% if job_type != 'test' %}
             <button class="btn btn-sm btn-outline-warning me-1"
                     onclick="reschedule({{ s.id }})">Reschedule</button>
             <button class="btn btn-sm btn-outline-danger"
                     onclick="manualRestart({{ s.id }})">Restart Now</button>
+            {% endif %}
           </td>
         </tr>
         {% endfor %}

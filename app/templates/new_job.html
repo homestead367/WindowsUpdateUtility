@@ -68,9 +68,14 @@
             <input type="password" class="form-control" name="default_password"
                    placeholder="Enter WinRM password" required>
           </div>
-          <button type="submit" class="btn btn-success btn-lg">
-            <i class="bi bi-play-fill me-1"></i>Start Patching
-          </button>
+          <div class="d-flex gap-2">
+            <button type="submit" class="btn btn-success btn-lg">
+              <i class="bi bi-play-fill me-1"></i>Start Patching
+            </button>
+            <button type="submit" formaction="/jobs/new/test" class="btn btn-outline-secondary btn-lg">
+              <i class="bi bi-wifi me-1"></i>Test Connectivity
+            </button>
+          </div>
         </form>
       </div>
       {% endif %}
