@@ -93,7 +93,7 @@ def start_job():
         db.add(job)
         db.flush()
 
-        server_records = []
+        server_ids = []
         per_server_passwords = {}
         for s in servers:
             record = Server(
@@ -105,7 +105,7 @@ def start_job():
             )
             db.add(record)
             db.flush()
-            server_records.append(record)
+            server_ids.append(record.id)
             per_server_passwords[record.id] = s['password']
 
         db.commit()
@@ -118,17 +118,17 @@ def start_job():
         db.close()
 
     executor = get_executor(max_workers)
-    for record in server_records:
+    for server_id in server_ids:
         executor.submit(
             run_server_worker,
-            record.id,
+            server_id,
             default_username,
             default_password,
-            per_server_passwords.get(record.id),
+            per_server_passwords.get(server_id),
             winrm_port,
         )
 
-    flash(f'Job started for {len(server_records)} servers.', 'success')
+    flash(f'Job started for {len(server_ids)} servers.', 'success')
     return redirect(url_for('jobs.job_detail', job_id=job_id))
 
 
