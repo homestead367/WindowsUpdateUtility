@@ -68,7 +68,7 @@ function updateRow(s) {
   badge.textContent = STATUS_LABELS[s.status] || s.status.replace(/_/g, ' ');
 
   const cells = row.querySelectorAll('td');
-  cells[3].textContent = s.updates_installed || '—';
+  cells[3].textContent = s.updates_installed != null ? s.updates_installed : '—';
   cells[4].textContent = s.restart_scheduled_at
     ? s.restart_scheduled_at.replace('T', ' ').substring(0, 16)
     : '—';

@@ -50,7 +50,7 @@
                title="{{ s.error_message | e }}" data-bs-toggle="tooltip"></i>
             {% endif %}
           </td>
-          <td>{{ s.updates_installed if s.updates_installed else '—' }}</td>
+          <td>{{ s.updates_installed if s.updates_installed is not none else '—' }}</td>
           <td>{{ s.restart_scheduled_at or '—' }}</td>
           <td>
             <button class="btn btn-sm btn-outline-info me-1"
