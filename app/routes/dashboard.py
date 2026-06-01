@@ -17,6 +17,7 @@ def index():
                 'filename': job.filename,
                 'created_at': job.created_at.strftime('%Y-%m-%d %H:%M'),
                 'status': job.status,
+                'job_type': job.job_type,
                 'total': p['total'],
                 'done': p['done'],
                 'pct': p['pct'],

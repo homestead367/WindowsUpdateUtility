@@ -17,7 +17,12 @@
       {% for job in jobs %}
       <tr>
         <td class="text-muted">{{ job.id }}</td>
-        <td><i class="bi bi-file-earmark-spreadsheet me-1 text-success"></i>{{ job.filename }}</td>
+        <td>
+          <i class="bi bi-file-earmark-spreadsheet me-1 text-success"></i>{{ job.filename }}
+          {% if job.job_type == 'test' %}
+          <span class="badge bg-secondary ms-1">Test</span>
+          {% endif %}
+        </td>
         <td>{{ job.created_at }}</td>
         <td>{{ job.done }} / {{ job.total }}</td>
         <td style="min-width:120px">
