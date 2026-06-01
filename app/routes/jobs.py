@@ -144,12 +144,13 @@ def job_detail(job_id):
         progress = job.progress()
         created_at = job.created_at
         filename = job.filename
+        job_type = job.job_type
     finally:
         db.close()
     return render_template('job_detail.html', job_id=job_id,
                            filename=filename, servers=servers,
                            progress=progress, created_at=created_at,
-                           job_type=job.job_type)
+                           job_type=job_type)
 
 
 @bp.post('/jobs/new/test')
