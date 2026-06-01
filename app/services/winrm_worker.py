@@ -181,6 +181,66 @@ def test_connection(ip: str, port: int, username: str, password: str) -> tuple[b
         return False, str(e)
 
 
+def run_server_test_worker(server_id: int, default_username: str, default_password: str,
+                           per_server_password: str | None, winrm_port: int):
+    """
+    Test-mode worker: connect, verify PSWindowsUpdate module, count available updates.
+    Does NOT install updates or schedule restarts.
+    Stores available update count in updates_installed.
+    """
+    from app.database import get_session
+    from app.models import Server
+
+    s = get_session()
+    try:
+        server = s.get(Server, server_id)
+        username = server.username or default_username
+        password = per_server_password or default_password
+        ip = server.ip_address
+    finally:
+        s.close()
+
+    if not is_allowed_ip(ip):
+        _update_server(server_id, status='error',
+                       error_message=f'Blocked: {ip} is not a private network address')
+        return
+
+    _update_server(server_id, status='connecting')
+
+    try:
+        session = winrm.Session(
+            f'http://{ip}:{winrm_port}/wsman',
+            auth=(username, password),
+            transport='ntlm',
+            server_cert_validation='ignore',
+        )
+        result = _run_ps(session, 'Write-Output "ping"')
+        if result.status_code != 0:
+            raise ConnectionError(result.std_err.decode(errors='replace'))
+    except Exception as e:
+        _update_server(server_id, status='error', error_message=f'WinRM unreachable: {e}')
+        return
+
+    _update_server(server_id, status='checking_module')
+    result = _run_ps(session, PS_ENSURE_MODULE)
+    if result.status_code != 0:
+        _update_server(server_id, status='error',
+                       error_message='PSWindowsUpdate install failed: ' +
+                       result.std_err.decode(errors='replace'))
+        return
+
+    _update_server(server_id, status='checking_updates')
+    result = _run_ps(session, PS_LIST_UPDATES)
+    if result.status_code != 0:
+        _update_server(server_id, status='error',
+                       error_message='Get-WUList failed: ' +
+                       result.std_err.decode(errors='replace'))
+        return
+
+    available = int(result.std_out.decode(errors='replace').strip() or '0')
+    _update_server(server_id, status='test_complete', updates_installed=available)
+
+
 def immediate_restart(ip: str, port: int, username: str, password: str) -> tuple[bool, str]:
     """Delete scheduled task and issue immediate restart."""
     if not is_allowed_ip(ip):
