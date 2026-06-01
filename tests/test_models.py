@@ -41,3 +41,30 @@ def test_app_settings_defaults(session):
     settings = get_or_create_settings(session)
     assert settings.winrm_port == 5985
     assert settings.max_workers == 10
+
+def test_job_type_defaults_to_patch(session):
+    job = Job(filename='test.csv')
+    session.add(job)
+    session.commit()
+    assert job.job_type == 'patch'
+
+def test_job_type_can_be_set_to_test(session):
+    job = Job(filename='test.csv', job_type='test')
+    session.add(job)
+    session.commit()
+    assert job.job_type == 'test'
+
+def test_progress_counts_test_complete_as_done(session):
+    job = Job(filename='test.csv', status='running')
+    session.add(job)
+    session.flush()
+    session.add(Server(job_id=job.id, server_name='A', ip_address='10.0.0.1',
+                       restart_window='Sun 02:00', status='test_complete'))
+    session.add(Server(job_id=job.id, server_name='B', ip_address='10.0.0.2',
+                       restart_window='Sun 02:00', status='pending'))
+    session.commit()
+    session.refresh(job)
+    p = job.progress()
+    assert p['done'] == 1
+    assert p['total'] == 2
+    assert p['pct'] == 50

@@ -11,6 +11,7 @@ class Job(Base):
     filename: Mapped[str] = mapped_column(String(255), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
     status: Mapped[str] = mapped_column(String(50), default='pending')
+    job_type: Mapped[str] = mapped_column(String(10), default='patch')
 
     servers: Mapped[list['Server']] = relationship(
         'Server', back_populates='job', cascade='all, delete-orphan'
@@ -21,7 +22,7 @@ class Job(Base):
         if total == 0:
             return {'total': 0, 'done': 0, 'pct': 0}
         done = sum(1 for s in self.servers if s.status in (
-            'up_to_date', 'restart_scheduled', 'error'
+            'up_to_date', 'restart_scheduled', 'error', 'test_complete'
         ))
         return {'total': total, 'done': done, 'pct': int(done / total * 100)}
 
